@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
+  </head>
+  <body style="background-image: url(images/page.jpg); background-size: cover; background-repeat: no-repeat;">
+	<p style="color: white; font-size: 50px; font-family: 'Press Start 2P', cursive;; text-align: center; font-weight:bold;">FLAPPY BOO</p>
+	<p style="color: white; font-size: 15px; font-family: 'Press Start 2P', cursive;; position:absolute; top:90%; left:2%; font-weight:bold;">Clique ou presse Espace</br> </br>pour faire sauter le BOO</p>
+   <canvas id="canvas" width="512" height="400" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); border: 10px solid rgba(46, 4, 163, 0.993);"></canvas>
+ 
+
+   <script>
+     
+   //ON DEFINI TOUTES NOS VARIABLES
+	var cvs = document.getElementById("canvas");
+	var ctx = cvs.getContext("2d");
+   	var mario = new Image();
+	var fond = new Image();
+	var sol = new Image();
+	var ghost = new Audio();
+	var ambiance = new Audio();
+	var haut = new Image();
+	var bas = new Image();
+	
+	var jeu = 0;
+	//ON ASSIGNE LES VALEURS
+	mario.src = "images/boo1.png";
+	fond.src = "images/fond3.jpg";
+	sol.src = "images/sol2.jpg";
+
+	haut.src = "images/pipe3.png";
+	bas.src = "images/pipe4.png";
+	ambiance.src = "images/ambiance.mp3";
+	ghost.src = "images/ghost.wav";
+
+	
+	//variable écart tuyau
+	var gap =320;
+	var constant = bas.height+gap;
+   	//ON DEFINI LA POSITION INITIALE DE NOTRE PERSONNAGE
+	var MarioX = 10;
+	var MarioY = 150;
+	//ON DEFINI LA GRAVITE
+	var gravite = 1.5;
+	//score
+	var score = 0;
+	//ON DEFINI LES ACTIONS AU CLAVIER OU AU CLIC
+	document.addEventListener("keydown",monte) || document.addEventListener("click",monte) ;
+	//ON DEFINI L'ACTION A FAIRE LORSQUE L'ON CLIQUE
+	function monte(){
+		MarioY -= 35;
+	}
+	//initialise le tableau
+	let pipe = [];
+
+	pipe[0] = {
+  	x : cvs.width,
+  	y : 0
+	};
+ 
+	//ON MET EN PLACE TOUS LES ELEMENTS DANS NOTRE CANEVAS
+	function dessineAnimation(){
+		//ON DESSINE NOTRE FOND
+		ctx.drawImage(fond,0,0);
+		//ON DESSINE NOTRE SOL
+		ctx.drawImage(sol,0,cvs.height - sol.height);
+		//ON DESSINE NOTRE PERSONNAGE AVEC SA POSITION
+		ctx.drawImage(mario,MarioX,MarioY);
+		//ON APPLIQUE NOTRE GRAVITE A NOTRE PERSONNAGE
+		MarioY += gravite;
+		ambiance.play();
+		
+		//COLLISION SOL ET PLAFOND
+		if (MarioY + mario.height > cvs.height - sol.height || MarioY <= 0) {
+		ghost.play();
+		ambiance.pause();
+		alert("Game Over");
+		}
+		//dessine tuyau
+		for(let i = 0; i < pipe.length;i++){
+		ctx.drawImage(haut,pipe[i].x,pipe[i].y);
+		ctx.drawImage(bas,pipe[i].x,pipe[i].y+constant);
+
+		pipe[i].x--;
+		//répète le tuyau
+		if( pipe[i].x == 170){
+			pipe.push({
+				x : cvs.width,
+				y : Math.floor(Math.random()*haut.height)-haut.height
+			})
+		}
+		//collision mario et tuyau
+		if(MarioX + mario.width >= pipe[i].x && MarioX <= pipe[i].x + haut.width && (MarioY <= pipe[i].y + haut.height || MarioY+mario.height >=pipe[i].y+constant)) {
+			ambiance.pause();
+			ghost.play();
+			alert("Game over");
+		}
+		//score
+		if(pipe[i].x == 10){
+			score++
+		}
+		ctx.fillStyle = "white"
+		ctx.font = '35px serif';
+  		ctx.fillText('Score :'+score, 5, 30);
+		}
+
+		//ON NOTIFIE AU NAVIGATEUR QUE L'ON SOUHAITE EXECUTER UNE ANIMATION ET ON DEMANDE QUE CELUI-CI EXECUTE UNE FONCTION SPECIFIQUE DE MISE A JOUR
+		requestAnimationFrame(dessineAnimation);
+    }
+	//ON APPELLE NOTRE FONCTION
+	dessineAnimation();
+   
+   </script>
+   
+  </body>
+</html>
